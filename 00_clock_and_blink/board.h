@@ -50,21 +50,21 @@
 
 #if BOARD == ARDUINO_NANO_16MHZ_F_CPU_DIV8 || BOARD == ATMEGA328P_EXT_16MHZ_F_CPU_DIV8 || \
     BOARD == ATMEGA328P_EXT_8MHZ_F_CPU_DIV8 || BOARD == ATMEGA328P_EXT_4MHZ_F_CPU_DIV8
-#define F_CPU_HZ F_CLK_HZ / 8
+#define F_CPU_HZ (F_CLK_HZ / 8)
 #else
 #define F_CPU_HZ F_CLK_HZ
 #endif
 
 #ifdef F_CLK_HZ
-#define F_CLK_KHZ F_CLK_HZ / 1000
+#define F_CLK_KHZ (F_CLK_HZ / 1000)
 // Compatibility with avr/delay.h
-#define F_CPU F_CLK_HZ
+#define F_CPU (F_CPU_HZ)
 #endif
 
-// #define USE_CPU_CLOCK_PRESCALER_AT_RUNTIME
+#define USE_CPU_CLOCK_PRESCALER_AT_RUNTIME
 #ifdef USE_CPU_CLOCK_PRESCALER_AT_RUNTIME
 static float f_cpu_hz = F_CPU_HZ;
-#undef F_CPU_HZ
+// #undef F_CPU_HZ
 #endif
 
 #endif    // BOARD_H
