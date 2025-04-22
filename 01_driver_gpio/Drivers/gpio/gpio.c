@@ -15,6 +15,7 @@
 #include "gpio.h"
 #include "../../board.h"
 #include <avr/io.h>
+#include <stddef.h>
 
 #define ASSERT_GPIO_PORT(port, err_value)                                     \
     do {                                                                      \
@@ -35,6 +36,7 @@ static gpio_regs_t get_gpio_registers(gpio_port_t port) {
     case GPIO_PORTC: return (gpio_regs_t){.ddrx = &DDRC, .portx = &PORTC, .pinx = &PINC};
     case GPIO_PORTD: return (gpio_regs_t){.ddrx = &DDRD, .portx = &PORTD, .pinx = &PIND};
     }
+    return (gpio_regs_t){.ddrx = NULL, .portx = NULL, .pinx = NULL};    // This should never happen
 }
 
 void gpio_config(gpio_port_t port, gpio_pin_t pins, gpio_mode_t mode) {
