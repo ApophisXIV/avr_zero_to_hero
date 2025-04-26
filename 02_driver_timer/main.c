@@ -11,16 +11,22 @@ void TIM_period_elapsed_callback(TIM_handle_t *htim) {
 
 int main(void) {
 
-    TIM_handle_t htim = {
+    TIM_init_t tim0_cfg = {
         .timer        = TIM_0,
-        .state        = TIM_STATE_READY,
         .clk_source   = TIM_CLK_INTERNAL_PRESCALER_DIV64,
         .preset_value = 0,
+        .mode.normal  = NORMAL_AUTO_RELOAD,
     };
 
-    TIM_base_start_IT(&htim);
+    TIM_handle_t *htim0;
+
+    TIM_base_init(htim0, &tim0_cfg);
+
+    TIM_base_start(htim0);
 
     while (1) {
+        if (TIM_get_state(htim0) == TIM_STATE_TIMEOUT) {
+        }
     }
 
     return 0;

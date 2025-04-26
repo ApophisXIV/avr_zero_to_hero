@@ -20,22 +20,12 @@
 #include <avr/io.h>
 #include <stdbool.h>
 
-// typedef struct {
-//     union {
-//         tmr0_prescaler_t tmr0_prescaler;
-//         tmr1_prescaler_t tmr1_prescaler;
-//         tmr2_prescaler_t tmr2_prescaler;
-//     } prescaler;
-//     union {
-//         uint8_t tmr0_preset;
-//         uint16_t tmr1_preset;
-//         uint8_t tmr2_preset;
-//     } preset;
-// } timer_cfg_t;
-
-// typedef struct {
-//     tmr0_prescaler_t prescaler;
-// } timer_cfg_t;
+/* Base config ------------------------------ */
+typedef enum {
+    TIM_0,
+    TIM_1,
+    TIM_2,
+} TIM_timer_t;
 
 typedef enum {
     TIM_CLK_INTERNAL_PRESCALER_DIV1,
@@ -48,62 +38,79 @@ typedef enum {
     TIM_CLK_EXTERNAL_RISING_EDGE,
 } TIM_clk_source_t;
 
+/* CTC config ------------------------------- */
 typedef enum {
-    TIM_0,
-    TIM_1,
-    TIM_2,
-} TIM_timer_t;
+    CTC_NO_OUTPUT  = 0,
+    CTC_PIN_TOGGLE = 1,
+    CTC_PIN_CLEAR  = 2,
+    CTC_PIN_SET    = 3,
+} TIM_CTC_output_t;
 
 typedef enum {
-    TIM_CHANNEL_A,
-    TIM_CHANNEL_B,
-} TIM_channel_t;
+    CTC_CHANNEL_A,
+    CTC_CHANNEL_B,
+} TIM_CTC_channel_t;
+
+typedef struct {
+    TIM_CTC_output_t output_behavior;
+    TIM_CTC_channel_t channel;
+} TIM_CTC_mode_t;
+
+/* Normal config ----------------------------- */
+typedef enum {
+    NORMAL_AUTO_RELOAD,
+    NORMAL_ONE_SHOT,
+} TIM_Normal_mode_t;
+
+/* Config datatype ---------------------------- */
+typedef struct {
+    TIM_timer_t timer;
+    TIM_clk_source_t clk_source;
+    uint16_t preset_value;
+    union {
+        TIM_Normal_mode_t normal;
+        TIM_CTC_mode_t ctc;
+    } mode;
+} TIM_init_t;
 
 typedef enum {
     TIM_STATE_READY,
     TIM_STATE_BUSY,
     TIM_STATE_TIMEOUT,
+    TIM_STATE_MATCH,
 } TIM_state_t;
 
-typedef enum {
-    TIM_MODE_NORMAL,
-    TIM_MODE_CTC,
-    TIM_MODE_FAST_PWM,
-    TIM_MODE_PHASE_CORRECT_PWM,
-} TIM_mode_t;
+struct TIM_handle;
+typedef struct TIM_handle TIM_handle_t;
 
-typedef struct {
-    TIM_timer_t timer;
-    TIM_state_t state;
-    TIM_clk_source_t clk_source;
-    uint16_t preset_value;
-} TIM_handle_t;
+TIM_state_t TIM_get_state(TIM_handle_t *htim);
 
-void TIM_base_init(TIM_handle_t *htim);
+/* Base functions ----------------------------- */
+void TIM_base_init(TIM_handle_t *htim, TIM_init_t *cfg);
 
 void TIM_base_start(TIM_handle_t *htim);
 void TIM_base_stop(TIM_handle_t *htim);
 
-TIM_state_t TIM_get_state(TIM_handle_t *htim);
-
 void TIM_base_start_IT(TIM_handle_t *htim);
 void TIM_base_stop_IT(TIM_handle_t *htim);
 
-void TIM_compare_match_A_start(TIM_handle_t *htim);
-void TIM_compare_match_A_stop(TIM_handle_t *htim);
+/* CTC functins ------------------------------ */
+void TIM_CTC_init(TIM_handle_t *htim, TIM_init_t *cfg);
 
-void TIM_compare_match_A_start_IT(TIM_handle_t *htim);
-void TIM_compare_match_A_stop_IT(TIM_handle_t *htim);
+void TIM_CTC_A_start(TIM_handle_t *htim);
+void TIM_CTC_A_stop(TIM_handle_t *htim);
 
-void TIM_compare_match_B_start(TIM_handle_t *htim);
-void TIM_compare_match_B_stop(TIM_handle_t *htim);
+void TIM_CTC_B_start(TIM_handle_t *htim);
+void TIM_CTC_B_stop(TIM_handle_t *htim);
 
-void TIM_compare_match_B_start_IT(TIM_handle_t *htim);
-void TIM_compare_match_B_stop_IT(TIM_handle_t *htim);
+void TIM_CTC_A_start_IT(TIM_handle_t *htim);
+void TIM_CTC_A_stop_IT(TIM_handle_t *htim);
 
-// Callbacks
+void TIM_CTC_B_start_IT(TIM_handle_t *htim);
+void TIM_CTC_B_stop_IT(TIM_handle_t *htim);
+
+/* Callbacks ------------------------------- */
 extern void TIM_period_elapsed_callback(TIM_handle_t *htim);
-extern void TIM_compare_match_A_callback(TIM_handle_t *htim);
-extern void TIM_compare_match_B_callback(TIM_handle_t *htim);
+extern void TIM_CTC_callback(TIM_handle_t *htim);
 
 #endif    // TIMER_H
