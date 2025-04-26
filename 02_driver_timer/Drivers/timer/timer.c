@@ -57,7 +57,7 @@ static TIM_config_regs_t TIM_regs[] = {
 
 #define TOVx_SHIFT  0
 #define OCFxA_SHIFT 1
-#define OCFxA_SHIFT 2
+#define OCFxB_SHIFT 2
 
 #define TOIEx_SHIFT  0
 #define OCIExA_SHIFT 1
@@ -84,7 +84,7 @@ static inline void TIM_update_state(TIM_handle_t *htim) {
     uint8_t flag_reg = *TIM_regs[htim->config.timer].TIFRx;
     if (flag_reg & (1 << TOVx_SHIFT)) {
         htim->state = TIM_STATE_TIMEOUT;
-    } else if (flag_reg & (1 << OCIExA_SHIFT) || flag_reg & (1 << OCIExB_SHIFT)) {
+    } else if (flag_reg & (1 << OCFxA_SHIFT) || flag_reg & (1 << OCFxB_SHIFT)) {
         htim->state = TIM_STATE_MATCH;
     }
 }
