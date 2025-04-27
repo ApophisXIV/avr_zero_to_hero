@@ -19,6 +19,7 @@
 #include "../uart/serial_port.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #define TIM_8B_MAX_VALUE  255
