@@ -19,6 +19,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define TIM_8B_MAX_VALUE  255
 #define TIM_16B_MAX_VALUE 65535
