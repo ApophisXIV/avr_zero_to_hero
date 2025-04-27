@@ -3,30 +3,54 @@
 
 #include "Drivers/gpio/gpio.h"
 #include "Drivers/timer/timer.h"
-#include <util/delay.h>
+#include <avr/interrupt.h>
 
-void TIM_period_elapsed_callback(TIM_handle_t *htim) {
-    gpio_toggle_pin(GPIO_PORTB, GPIO_0);
+extern void TIM_period_elapsed_callback(TIM_handle_t *htim) {
+    gpio_toggle_pin(GPIO_PORTB, GPIO_1);
+}
+
+extern void TIM_CTC_callback(TIM_handle_t *htim) {
+    gpio_toggle_pin(GPIO_PORTB, GPIO_5);
 }
 
 int main(void) {
 
-    TIM_init_t tim0_cfg = {
+    // Arduino nano: PB1 = D9 , PB5 = D13
+
+    gpio_config(GPIO_PORTB, GPIO_5, GPIO_OUTPUT_INITIAL_LOW);
+    gpio_config(GPIO_PORTB, GPIO_1, GPIO_OUTPUT_INITIAL_LOW);
+
+    TIM_init_t cfg0 = {
         .timer        = TIM_0,
-        .clk_source   = TIM_CLK_INTERNAL_PRESCALER_DIV64,
-        .preset_value = 0,
-        .mode.normal  = NORMAL_AUTO_RELOAD,
+        .clk_source   = TIM_CLK_INTERNAL_PRESCALER_DIV256,
+        .preset_value = 131,    // 2ms
+        .mode         = NORMAL_TIMER_AUTORELOAD,
     };
 
-    TIM_handle_t *htim0;
+    TIM_handle_t *htim0 = TIM_base_init(&cfg0);
+    if (!htim0) {
+        printf("Error initializing timer 0\n");
+        return -1;
+    }
 
-    TIM_base_init(htim0, &tim0_cfg);
+    TIM_init_t cfg2 = {
+        .timer        = TIM_2,
+        .clk_source   = TIM_CLK_INTERNAL_PRESCALER_DIV64,
+        .preset_value = 251,    // 1ms
+        .mode         = CTC_CHANNEL_A_NO_OUTPUT,
+    };
 
-    TIM_base_start(htim0);
+    TIM_handle_t *htim2 = TIM_CTC_init(&cfg2);
+    if (!htim2) {
+        printf("Error initializing timer 2\n");
+        return -1;
+    }
+
+    TIM_base_start_IT(htim0);
+    TIM_CTC_A_start_IT(htim2);
+    sei();
 
     while (1) {
-        if (TIM_get_state(htim0) == TIM_STATE_TIMEOUT) {
-        }
     }
 
     return 0;
