@@ -16,6 +16,7 @@
 
 #include "../../board.h"
 
+#include "../uart/serial_port.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdio.h>
