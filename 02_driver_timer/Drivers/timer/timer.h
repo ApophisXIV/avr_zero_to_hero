@@ -53,15 +53,7 @@ typedef enum {
     CTC_CHANNEL_A_PIN_SET,
     CTC_CHANNEL_B_PIN_SET,
 } TIM_mode_t;
-    CTC_CHANNEL_A_NO_OUTPUT,
-    CTC_CHANNEL_B_NO_OUTPUT,
-    CTC_CHANNEL_A_PIN_TOGGLE,
-    CTC_CHANNEL_B_PIN_TOGGLE,
-    CTC_CHANNEL_A_PIN_CLEAR,
-    CTC_CHANNEL_B_PIN_CLEAR,
-    CTC_CHANNEL_A_PIN_SET,
-    CTC_CHANNEL_B_PIN_SET,
-} TIM_mode_t;
+
 
 /* Config datatype ---------------------------- */
 typedef struct {
