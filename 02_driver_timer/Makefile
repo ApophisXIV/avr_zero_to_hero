@@ -5,7 +5,7 @@ TARGET_FORMAT = .elf
 TARGET = $(BUILD_DIR)$(TARGET_NAME)$(TARGET_FORMAT)
 
 # -------------------------------- Programmer -------------------------------- #
-PROGRAMMER_MCU_NAME = m328pb
+PROGRAMMER_MCU_NAME = m328p
 PROGRAMMER = usbtiny
 PROGRAMMER_PORT =
 PROGRAMMER_EXITSPEC = -E reset

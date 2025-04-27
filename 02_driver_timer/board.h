@@ -25,7 +25,7 @@
 #define ATMEGA328P_EXT_16MHZ_F_CPU_DIV8 7
 
 /* ----------------------------- Board selection ---------------------------- */
-#define BOARD ARDUINO_NANO_16MHZ_F_CPU_DIV8
+#define BOARD ARDUINO_NANO_16MHZ
 /* -------------------------------------------------------------------------- */
 
 #if BOARD == ATMEGA328P_EXT_4MHZ || BOARD == ATMEGA328P_EXT_4MHZ_F_CPU_DIV8 ||   \
