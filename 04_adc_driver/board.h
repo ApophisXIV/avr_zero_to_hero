@@ -73,7 +73,7 @@ static float f_cpu_hz = F_CPU_HZ;
 
 // ADC ---------------------------------------
 #define USE_ADC
-// #define USE_ADC_EEPROM_CALIBRATED_INT_REF
+#define USE_ADC_EEPROM_CALIBRATED_INT_REF
 
 // UART --------------------------------------
 #define USE_UART
