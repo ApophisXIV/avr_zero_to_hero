@@ -5,7 +5,7 @@ TARGET_FORMAT = .elf
 TARGET = $(BUILD_DIR)$(TARGET_NAME)$(TARGET_FORMAT)
 
 # -------------------------------- Programmer -------------------------------- #
-PROGRAMMER_MCU_NAME = m328pb
+PROGRAMMER_MCU_NAME = m328p
 PROGRAMMER = usbtiny
 PROGRAMMER_PORT =
 PROGRAMMER_EXITSPEC = -E reset
@@ -79,7 +79,7 @@ LIB_SCANF_MIN =  -Wl,-u,vfscanf -lscanf_min
 LIB_SCANF_FLOAT = -Wl,-u,vfscanf -lscanf_flt
 LIB_MATH = -lm
 
-LDFLAGS =
+LDFLAGS = $(LIB_PRINTF_MIN) $(LIB_MATH)
 
 # ---------------------------------- Recipes --------------------------------- #
 all: $(TARGET)
