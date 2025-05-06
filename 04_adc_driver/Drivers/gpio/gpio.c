@@ -63,7 +63,9 @@ static uint8_t GPIO_IT_get_mode(GPIO_mode_t mode, uint8_t pin) {
     case GPIO_INPUT_IT_LEVEL_CHANGE: return GPIO_IT_LEVEL_CHANGE_VALUE << offset;
     case GPIO_INPUT_IT_FALLING: return GPIO_IT_FALLING_VALUE << offset;
     case GPIO_INPUT_IT_RISING: return GPIO_IT_RISING_VALUE << offset;
+    default: break;
     }
+    return 0;    // This should never happen
 }
 
 static inline __attribute__((always_inline)) void GPIO_INTx_config(GPIO_port_t port, GPIO_pin_t *pin, GPIO_mode_t mode) {
