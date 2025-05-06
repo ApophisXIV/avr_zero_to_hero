@@ -1,5 +1,5 @@
 /**
- * @file gpio.h
+ * @file GPIO.h
  * @author Guido Rodriguez (guerodriguez@fi.uba.ar)
  * @brief
  * @version 0.1
@@ -21,20 +21,27 @@ typedef enum {
     GPIO_PORTB,
     GPIO_PORTC,
     GPIO_PORTD,
-} gpio_port_t;
+} GPIO_port_t;
 
 typedef enum {
     GPIO_OUTPUT,
     GPIO_OUTPUT_INITIAL_HIGH,
     GPIO_OUTPUT_INITIAL_LOW,
     GPIO_INPUT,
-    GPIO_INPUT_PULLUP
-} gpio_mode_t;
+    GPIO_INPUT_PULLUP,
+    GPIO_INPUT_IT_LEVEL_CHANGE,
+    GPIO_INPUT_IT_LOW_LEVEL,
+    GPIO_INPUT_IT_LOW_LEVEL_WITH_PULLUP,
+    GPIO_INPUT_IT_FALLING,
+    GPIO_INPUT_IT_RISING,
+} GPIO_mode_t;
 
 typedef enum {
     GPIO_LOW  = 0,
     GPIO_HIGH = 1,
-} gpio_pin_state_t;
+    GPIO_EDGE_RISING,
+    GPIO_EDGE_FALLING,
+} GPIO_pin_state_t;
 
 typedef enum {
     GPIO_0 = (1 << 0),
@@ -45,14 +52,16 @@ typedef enum {
     GPIO_5 = (1 << 5),
     GPIO_6 = (1 << 6),
     GPIO_7 = (1 << 7),
-} gpio_pin_t;
+} GPIO_pin_t;
 
-void gpio_config(gpio_port_t port, gpio_pin_t pins, gpio_mode_t mode);
+void GPIO_config(GPIO_port_t port, GPIO_pin_t pins, GPIO_mode_t mode);
 
-void gpio_write_pin(gpio_port_t port, gpio_pin_t pin, gpio_pin_state_t state);
+void GPIO_write_pin(GPIO_port_t port, GPIO_pin_t pin, GPIO_pin_state_t state);
 
-void gpio_toggle_pin(gpio_port_t port, gpio_pin_t pin);
+void GPIO_toggle_pin(GPIO_port_t port, GPIO_pin_t pin);
 
-gpio_pin_state_t gpio_read_pin(gpio_port_t port, gpio_pin_t pin);
+GPIO_pin_state_t GPIO_read_pin(GPIO_port_t port, GPIO_pin_t pin);
+
+extern void GPIO_EXTI_callback(GPIO_port_t port, GPIO_pin_t pin, GPIO_pin_state_t state);
 
 #endif    // GPIO_H
