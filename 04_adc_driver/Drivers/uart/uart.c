@@ -1,4 +1,4 @@
-#include "uart.h"
+#include "../../../02_driver_timer/Drivers/uart/uart.h"
 #include "../../board.h"
 
 #include <avr/interrupt.h>
@@ -24,6 +24,16 @@ void UART_init(void) {
 
     stdin  = &uart0_stdin;
     stdout = &uart0_stdout;
+}
+
+// void UART_IT_init(void) {
+//     UART_init();
+//     UCSR0B |= (1 << RXCIE0);    // Enable RX interrupt
+//     UCSR0B |= (1 << TXCIE0);    // Enable TX interrupt
+// }
+
+bool UART_is_available(void) {
+    return UCSR0A & (1 << RXC0);
 }
 
 static int uart0_write_byte(int write_byte, FILE *stream) {
