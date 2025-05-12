@@ -5,7 +5,7 @@
 #include <avr/io.h>
 #include <util/setbaud.h>
 
-static int UART_write_byte(int write_byte, FILE *stream);
+static int UART_write_byte(char write_byte, FILE *stream);
 static int UART_read_byte(FILE *stream);
 
 static FILE UART_stdin  = FDEV_SETUP_STREAM(NULL, UART_read_byte, _FDEV_SETUP_READ);
@@ -36,7 +36,7 @@ bool UART_is_available(void) {
     return UCSR0A & (1 << RXC0);
 }
 
-static int UART_write_byte(int write_byte, FILE *stream) {
+static int UART_write_byte(char write_byte, FILE *stream) {
     loop_until_bit_is_set(UCSR0A, UDRE0);    // Wait for empty transmit buffer
     UDR0 = write_byte;                       // write one byte to UART0
     return 0;
