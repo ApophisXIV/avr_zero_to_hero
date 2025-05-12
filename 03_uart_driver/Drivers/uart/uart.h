@@ -15,10 +15,16 @@
 #ifndef UART_H
 #define UART_H
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #define BAUD 9600
 
+struct uart;
+typedef struct uart UART_handle_t;
+
 void UART_init(void);
+
+bool UART_is_available(void);
 
 #endif    // UART_H

@@ -1,6 +1,7 @@
 #include "uart.h"
 #include "../../board.h"
 
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/setbaud.h>
 
@@ -25,6 +26,16 @@ void UART_init(void) {
     stdout = &uart0_stdout;
 }
 
+// void UART_IT_init(void) {
+//     UART_init();
+//     UCSR0B |= (1 << RXCIE0);    // Enable RX interrupt
+//     UCSR0B |= (1 << TXCIE0);    // Enable TX interrupt
+// }
+
+bool UART_is_available(void) {
+    return UCSR0A & (1 << RXC0);
+}
+
 static int uart0_write_byte(int write_byte, FILE *stream) {
     loop_until_bit_is_set(UCSR0A, UDRE0);    // Wait for empty transmit buffer
     UDR0 = write_byte;                       // write one byte to UART0
@@ -34,4 +45,10 @@ static int uart0_write_byte(int write_byte, FILE *stream) {
 static int uart0_read_byte(FILE *stream) {
     loop_until_bit_is_set(UCSR0A, RXC0);    // Wait for incoming data
     return UDR0;                            // read one byte from UART0
+}
+
+ISR(USART_TX_vect) {
+}
+
+ISR(USART_RX_vect) {
 }
