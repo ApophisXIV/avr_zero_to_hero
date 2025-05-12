@@ -67,4 +67,18 @@ static float f_cpu_hz = F_CPU_HZ;
 // #undef F_CPU_HZ
 #endif
 
+/* -------------------------- Hardware peripherals -------------------------- */
+
+// CPU Prescaler -----------------------------
+// #define USE_CPU_CLOCK_PRESCALER_AT_RUNTIME
+
+// GPIO --------------------------------------
+#define USE_GPIO
+
+// UART --------------------------------------
+#define USE_UART
+
+// TIM ---------------------------------------
+#define USE_TIMER
+
 #endif    // BOARD_H
