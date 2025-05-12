@@ -62,7 +62,8 @@ typedef enum {
     TIM_STATE_READY,
     TIM_STATE_BUSY,
     TIM_STATE_TIMEOUT,
-    TIM_STATE_MATCH,
+    TIM_STATE_MATCH_A,
+    TIM_STATE_MATCH_B,
 } TIM_state_t;
 
 struct TIM_handle;

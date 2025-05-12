@@ -22,8 +22,8 @@
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #define TIM_8B_MAX_VALUE  255
 #define TIM_16B_MAX_VALUE 65535
@@ -175,10 +175,10 @@ inline TIM_state_t TIM_get_state(TIM_handle_t *htim) {
         htim->state = TIM_STATE_TIMEOUT;
     } else if (mode == CTC_CHANNEL_A_NO_OUTPUT && (*flag_reg & (1 << OCFxA_SHIFT))) {
         *flag_reg   = (1 << OCFxA_SHIFT);
-        htim->state = TIM_STATE_MATCH;
+        htim->state = TIM_STATE_MATCH_A;
     } else if (mode == CTC_CHANNEL_B_NO_OUTPUT && (*flag_reg & (1 << OCFxB_SHIFT))) {
         *flag_reg   = (1 << OCFxB_SHIFT);
-        htim->state = TIM_STATE_MATCH;
+        htim->state = TIM_STATE_MATCH_B;
     } else {
         htim->state = TIM_STATE_BUSY;
     }
@@ -332,14 +332,14 @@ ISR(TIMER0_OVF_vect) {
 }
 ISR(TIMER0_COMPA_vect) {
     if (timer_handles[TIM_0].state == TIM_STATE_BUSY) {
-        timer_handles[TIM_0].state = TIM_STATE_MATCH;
+        timer_handles[TIM_0].state = TIM_STATE_MATCH_A;
         TIM_CTC_callback(&timer_handles[TIM_0]);
         timer_handles[TIM_0].state = TIM_STATE_BUSY;
     }
 }
 ISR(TIMER0_COMPB_vect) {
     if (timer_handles[TIM_0].state == TIM_STATE_BUSY) {
-        timer_handles[TIM_0].state = TIM_STATE_MATCH;
+        timer_handles[TIM_0].state = TIM_STATE_MATCH_B;
         TIM_CTC_callback(&timer_handles[TIM_0]);
         timer_handles[TIM_0].state = TIM_STATE_BUSY;
     }
@@ -360,14 +360,14 @@ ISR(TIMER1_OVF_vect) {
 }
 ISR(TIMER1_COMPA_vect) {
     if (timer_handles[TIM_1].state == TIM_STATE_BUSY) {
-        timer_handles[TIM_1].state = TIM_STATE_MATCH;
+        timer_handles[TIM_1].state = TIM_STATE_MATCH_A;
         TIM_CTC_callback(&timer_handles[TIM_1]);
         timer_handles[TIM_1].state = TIM_STATE_BUSY;
     }
 }
 ISR(TIMER1_COMPB_vect) {
     if (timer_handles[TIM_1].state == TIM_STATE_BUSY) {
-        timer_handles[TIM_1].state = TIM_STATE_MATCH;
+        timer_handles[TIM_1].state = TIM_STATE_MATCH_B;
         TIM_CTC_callback(&timer_handles[TIM_1]);
         timer_handles[TIM_1].state = TIM_STATE_BUSY;
     }
@@ -388,14 +388,14 @@ ISR(TIMER2_OVF_vect) {
 }
 ISR(TIMER2_COMPA_vect) {
     if (timer_handles[TIM_2].state == TIM_STATE_BUSY) {
-        timer_handles[TIM_2].state = TIM_STATE_MATCH;
+        timer_handles[TIM_2].state = TIM_STATE_MATCH_A;
         TIM_CTC_callback(&timer_handles[TIM_2]);
         timer_handles[TIM_2].state = TIM_STATE_BUSY;
     }
 }
 ISR(TIMER2_COMPB_vect) {
     if (timer_handles[TIM_2].state == TIM_STATE_BUSY) {
-        timer_handles[TIM_2].state = TIM_STATE_MATCH;
+        timer_handles[TIM_2].state = TIM_STATE_MATCH_B;
         TIM_CTC_callback(&timer_handles[TIM_2]);
         timer_handles[TIM_2].state = TIM_STATE_BUSY;
     }
