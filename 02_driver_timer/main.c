@@ -6,19 +6,19 @@
 #include <avr/interrupt.h>
 
 extern void TIM_period_elapsed_callback(TIM_handle_t *htim) {
-    gpio_toggle_pin(GPIO_PORTB, GPIO_1);
+    GPIO_toggle_pin(GPIO_PORTB, GPIO_1);
 }
 
 extern void TIM_CTC_callback(TIM_handle_t *htim) {
-    gpio_toggle_pin(GPIO_PORTB, GPIO_5);
+    GPIO_toggle_pin(GPIO_PORTB, GPIO_5);
 }
 
 int main(void) {
 
     // Arduino nano: PB1 = D9 , PB5 = D13
 
-    gpio_config(GPIO_PORTB, GPIO_5, GPIO_OUTPUT_INITIAL_LOW);
-    gpio_config(GPIO_PORTB, GPIO_1, GPIO_OUTPUT_INITIAL_LOW);
+    GPIO_config(GPIO_PORTB, GPIO_5, GPIO_OUTPUT_INITIAL_LOW);
+    GPIO_config(GPIO_PORTB, GPIO_1, GPIO_OUTPUT_INITIAL_LOW);
 
     TIM_init_t cfg0 = {
         .timer        = TIM_0,
