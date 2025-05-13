@@ -1,8 +1,12 @@
 MCU_TARGET = atmega328p
 
 TARGET_NAME = main
+
 TARGET_FORMAT = .elf
 TARGET = $(BUILD_DIR)$(TARGET_NAME)$(TARGET_FORMAT)
+
+TARGET_PRODUCTION_FORMAT = .hex
+TARGET_PRODUCTION = $(BUILD_DIR)$(TARGET_NAME)$(TARGET_PRODUCTION_FORMAT)
 
 EEP_FORMAT = .eep
 EEP_TARGET = $(BUILD_DIR)$(TARGET_NAME)$(EEP_FORMAT)
@@ -14,7 +18,8 @@ PROGRAMMER_PORT =
 PROGRAMMER_EXITSPEC = -E reset
 
 AVRDUDE = avrdude
-AVR_DUDE_OPTIONS = -p $(PROGRAMMER_MCU_NAME) -c $(PROGRAMMER) $(PROGRAMMER_EXITSPEC)
+AVRDUDE_LOAD_SPEED = -B 1
+AVR_DUDE_OPTIONS = -p $(PROGRAMMER_MCU_NAME) -c $(PROGRAMMER) $(PROGRAMMER_PORT) $(AVRDUDE_EXITSPEC)
 
 # -------------------------------- Files paths ------------------------------- #
 BUILD_DIR = ./build/
@@ -22,7 +27,7 @@ SRC_DIR = ./
 SRC_FILES = $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJ_FILES = $(patsubst $(SRC_DIR)%.c,$(BUILD_DIR)%.o,$(SRC_FILES))
 
-FILTER_DIRS = 
+FILTER_DIRS = ./Utils 
 
 # Filter out the directories that are not in the FILTER_DIRS list
 SRC_FILES := $(filter-out $(foreach dir,$(FILTER_DIRS),$(dir)%.c),$(SRC_FILES))
@@ -31,7 +36,7 @@ OBJ_FILES := $(filter-out $(foreach dir,$(FILTER_DIRS),$(dir)%.o),$(OBJ_FILES))
 # --------------------------------- Compiler --------------------------------- #
 CC = avr-gcc
 CSTD = -std=c99
-CWARN = -Wall -Wstrict-prototypes 
+CWARN = -Wall -Wstrict-prototypes -Wall -Wextra -Wno-unused-parameter -Wshadow 
 CDEFS =
 COPTMLEVEL= 2
 COPTM = -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums 
@@ -41,6 +46,7 @@ CFLAGS = $(CWARN) $(CDEFS) $(CSTD) -O$(COPTMLEVEL)
 # ----------------------------------- Utils ---------------------------------- #
 AVR_OBJCPY = avr-objcopy
 OBJDUMP = avr-objdump
+SIZE = avr-size
 
 MKDIR = mkdir -p
 RM = rm -rf
@@ -91,10 +97,11 @@ LIB_MATH = -lm
 LDFLAGS = $(LIB_PRINTF_FLOAT) $(LIB_MATH)
 
 # ---------------------------------- Recipes --------------------------------- #
-all: $(TARGET) $(EEP_TARGET)
+all: $(TARGET) $(EEP_TARGET) mem_usage
 
 $(TARGET): $(OBJ_FILES)
 	$(call link,$@,$^)
+	@$(AVR_OBJCPY) -O ihex $@ $(TARGET_PRODUCTION)
 
 $(BUILD_DIR)%.o: $(SRC_DIR)%.c
 	$(call compile,$<,$@)
@@ -121,24 +128,30 @@ fuses: $(TARGET) $(BUILD_DIR)fuses.hex
 
 $(EEP_TARGET): $(TARGET)
 	$(H_BAR_CYAN)
-	@echo '\033[1;41m --> \033[0;1;34m EEPROM: \033[0m \033[1;36m $(shell basename $(EEP_TARGET)) \033[0m\033[0m';
+	@echo '\033[1;41m --> \033[0;1;37m EEPROM: \033[0m \033[1;36m $(shell basename $(EEP_TARGET)) \033[0m\033[0m';
 	@$(H_BAR_CYAN)
 	$(AVR_OBJCPY) -O ihex -j .eeprom --change-section-lma .eeprom=0 $< $@
 	@$(H_BAR_CYAN)
 
 eeprom: $(EEP_TARGET)
 	$(H_BAR_GREEN)
-	@echo '\033[1;41m --> \033[0;1;34m Flashing EEPROM to MCU: \033[0m \033[1;32m  $(TARGET_NAME)$(EEP_FORMAT) \033[0m\033[0m';
+	@echo '\033[1;41m --> \033[0;1;37m Flashing EEPROM to MCU: \033[0m \033[1;32m  $(TARGET_NAME)$(EEP_FORMAT) \033[0m\033[0m';
 	$(H_BAR_GREEN)
 	$(AVRDUDE) $(AVR_DUDE_OPTIONS) -U eeprom:w:$(EEP_TARGET):i
 
-flash: $(TARGET)
+flash: $(TARGET) mem_usage
 	$(H_BAR_GREEN)
-	@echo '\033[1;41m --> \033[0;1;34m Flashing program to MCU: \033[0m \033[1;32m  $(TARGET_NAME)$(TARGET_FORMAT) \033[0m\033[0m';
+	@echo '\033[1;41m --> \033[0;1;37m Flashing program to MCU: \033[0m \033[1;32m  $(TARGET_NAME)$(TARGET_FORMAT) \033[0m\033[0m';
 	$(H_BAR_GREEN)
-	$(AVRDUDE) $(AVR_DUDE_OPTIONS) -U flash:w:$(TARGET)
+	$(AVRDUDE) $(AVR_DUDE_OPTIONS) $(AVRDUDE_LOAD_SPEED) -U flash:w:$(TARGET)
 	$(H_BAR_GREEN)
 
+mem_usage: $(TARGET)
+	$(H_BAR_BLUE)
+	@echo '\033[1;41m --> \033[0;1;37m Memory usage: \033[0m \033[1;32m $(shell basename $(TARGET)) \033[0m\033[0m';
+	$(H_BAR_BLUE)
+	@$(SIZE) --format=avr --mcu=$(MCU_TARGET) $(TARGET)
+	$(H_BAR_BLUE)
 
 clean:
 	$(call print_clean_msg)
