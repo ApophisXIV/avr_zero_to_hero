@@ -15,12 +15,23 @@
 #ifndef ADC_CAL_H
 #define ADC_CAL_H
 
+#include "adc.h"
+#include <stdbool.h>
 #include <stdint.h>
 
-uint8_t ADC_internal_ref_is_calibrated(void);
+struct ADC_calibration;
+typedef struct ADC_calibration ADC_calibration_t;
 
-void ADC_calibrate_internal_ref(void (*user_feedback_callback)(void));
+bool ADC_is_calibrated(void);
 
-uint16_t ADC_get_calibrated_internal_ref_mV(void);
+bool ADC_internal_ref_is_calibrated(void);
+uint16_t ADC_get_calibrated_internal_ref_mV(ADC_calibration_t *calibration);
+
+bool ADC_avcc_ref_is_calibrated(void);
+int16_t ADC_get_calibrated_avcc_ref_drift_mV(ADC_calibration_t *calibration);
+uint16_t ADC_get_calibrated_avcc_ref_mV(ADC_calibration_t *calibration);
+
+void ADC_calibrate(ADC_handle_t *hadc);
+ADC_calibration_t *ADC_get_calibration(void);
 
 #endif    // ADC_CAL_H
