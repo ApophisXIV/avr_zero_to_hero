@@ -11,6 +11,10 @@ void GPIO_EXTI_callback(GPIO_port_t port, GPIO_pin_t pin, GPIO_pin_state_t state
     is_panic_mode = true;
 }
 
+void delay(uint8_t time_ms) {
+    while (time_ms--) _delay_ms(1);
+}
+
 int main(void) {
 
     UART_init();
@@ -20,11 +24,12 @@ int main(void) {
     GPIO_config(GPIO_PORTB, GPIO_0, GPIO_OUTPUT_INITIAL_HIGH);
 
     ILS94202_init_t bms_cfg = {
-        .address  = ILS94202_SLAVE_ADDRESS_DEFAULT,
-        .i2c_freq = I2C_FREQ_400KHZ,
-        .i2c_port = GPIO_PORTC,
-        .scl_pin  = GPIO_5,
-        .sda_pin  = GPIO_4,
+        .address             = ILS94202_SLAVE_ADDRESS_DEFAULT,
+        .i2c_freq            = I2C_FREQ_400KHZ,
+        .i2c_port            = GPIO_PORTC,
+        .scl_pin             = GPIO_5,
+        .sda_pin             = GPIO_4,
+        .use_external_pullup = false,    // usa las pullups internas del micro
     };
 
     ILS94202_handle_t *hbms = ILS94202_init(&bms_cfg);
@@ -36,16 +41,16 @@ int main(void) {
         if (is_panic_mode) {
             cli();
 
-            // TODO: Apagar otros perifericos
+            // TODO: Apagar otros periféricos
 
-            while (!ILS94202_is_power_down(hbms)) {
-                // Intento apagar BMS hasta morir sin alimentacion
+            while (1) {
                 ILS94202_set_power_down_mode(hbms);
-                _delay_ms(2);
+                _delay_ms(5);
             }
+
         } else {
             GPIO_toggle_pin(GPIO_PORTB, GPIO_0);
-            _delay_ms(20);    // NOTE: NO usar delay en caso real
+            _delay_ms(20);    // NOTE: No usar delay en firmware final
         }
     }
 

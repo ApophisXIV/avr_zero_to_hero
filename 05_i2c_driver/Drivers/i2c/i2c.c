@@ -11,7 +11,6 @@
  * SPDX-License-Identifier: MIT
  *
  */
-
 #include "i2c.h"
 #include "../../board.h"
 #include <avr/io.h>
@@ -23,54 +22,75 @@ void I2C_init(I2C_freq_t freq) {
     TWCR = (1 << TWEN);
 }
 
-uint8_t I2C_start(uint8_t addr) {
+void I2C_reset(void) {
+    TWCR &= ~(1 << TWEN);
+    TWCR |= (1 << TWEN);
+}
+
+#define TIMEOUT 10000
+
+static inline __attribute__((always_inline)) uint8_t wait_for_twint(void) {
+    uint16_t count = 0;
+    while (!(TWCR & (1 << TWINT))) {
+        if (++count > TIMEOUT) return 0;
+    }
+    return 1;
+}
+
+I2C_status_t I2C_start(uint8_t addr) {
     TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
+    if (!wait_for_twint()) return I2C_ERR_TIMEOUT;
 
     if ((TWSR & 0xF8) != TW_START)
-        return 1;
+        return I2C_ERR_START;
 
     TWDR = (addr << 1);    // modo escritura
     TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
+    if (!wait_for_twint()) return I2C_ERR_TIMEOUT;
 
-    return ((TWSR & 0xF8) == TW_MT_SLA_ACK) ? 0 : 2;
+    return ((TWSR & 0xF8) == TW_MT_SLA_ACK) ? I2C_OK : I2C_ERR_SLA_NACK;
 }
 
-uint8_t I2C_start_read(uint8_t addr) {
+I2C_status_t I2C_start_read(uint8_t addr) {
     TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
+    if (!wait_for_twint()) return I2C_ERR_TIMEOUT;
 
     if ((TWSR & 0xF8) != TW_START)
-        return 1;
+        return I2C_ERR_START;
 
     TWDR = (addr << 1) | 0x01;    // modo lectura
     TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
+    if (!wait_for_twint()) return I2C_ERR_TIMEOUT;
 
-    return ((TWSR & 0xF8) == TW_MR_SLA_ACK) ? 0 : 2;
+    return ((TWSR & 0xF8) == TW_MR_SLA_ACK) ? I2C_OK : I2C_ERR_SLA_NACK;
 }
 
-uint8_t I2C_write(uint8_t data) {
+I2C_status_t I2C_write(uint8_t data) {
     TWDR = data;
     TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
-    return ((TWSR & 0xF8) == TW_MT_DATA_ACK) ? 0 : 1;
+    if (!wait_for_twint()) return I2C_ERR_TIMEOUT;
+
+    return ((TWSR & 0xF8) == TW_MT_DATA_ACK) ? I2C_OK : I2C_ERR_DATA_NACK;
 }
 
-uint8_t I2C_read_ack(void) {
+I2C_status_t I2C_read_ack(uint8_t *data) {
     TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
-    while (!(TWCR & (1 << TWINT)));
-    return TWDR;
+    if (!wait_for_twint()) return I2C_ERR_TIMEOUT;
+
+    *data = TWDR;
+    return I2C_OK;
 }
 
-uint8_t I2C_read_nack(void) {
+I2C_status_t I2C_read_nack(uint8_t *data) {
     TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
-    return TWDR;
+    if (!wait_for_twint()) return I2C_ERR_TIMEOUT;
+
+    *data = TWDR;
+    return I2C_OK;
 }
 
 void I2C_stop(void) {
-    TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);    // REVIEW - Revisar si se apaga por poner un 1 con OR o limpiando
-    while (TWCR & (1 << TWSTO));
+    TWCR             = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
+    uint16_t timeout = 1000;
+    while ((TWCR & (1 << TWSTO)) && --timeout);
 }

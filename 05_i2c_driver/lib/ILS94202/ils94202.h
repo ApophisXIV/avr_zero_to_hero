@@ -27,14 +27,16 @@ typedef struct {
     I2C_freq_t i2c_freq;
     GPIO_pin_t sda_pin, scl_pin;
     GPIO_port_t i2c_port;
+    bool use_external_pullup;
 } ILS94202_init_t;
 
 struct ILS94202_handle;
 typedef struct ILS94202_handle ILS94202_handle_t;
 
 ILS94202_handle_t *ILS94202_init(ILS94202_init_t *ILS94202_cfg);
+void ILS94202_bus_reset(ILS94202_handle_t *hILS94202);
 void ILS94202_set_slave_address(ILS94202_handle_t *hILS94202, uint8_t slave_address);
-void ILS94202_set_power_down_mode(ILS94202_handle_t *hILS94202);
-bool ILS94202_is_power_down(ILS94202_handle_t *hILS94202);
+I2C_status_t ILS94202_set_power_down_mode(ILS94202_handle_t *hILS94202);
+bool ILS94202_is_not_power_down(ILS94202_handle_t *hILS94202);
 
 #endif    // ILS94202_H
