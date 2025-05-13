@@ -1,3 +1,17 @@
+/**
+ * @file adc.h
+ * @author Guido Rodriguez (guerodriguez@fi.uba.ar)
+ * @brief
+ * @version 0.1
+ * @date 2025-04-24
+ *
+ * @copyright Copyright (c) 2025. All rights reserved.
+ *
+ * Licensed under the MIT License, see LICENSE for details.
+ * SPDX-License-Identifier: MIT
+ *
+ */
+
 #ifndef ADC_H
 #define ADC_H
 
@@ -8,8 +22,6 @@
 
 struct adc_handle;
 typedef struct adc_handle ADC_handle_t;
-
-#define MAX_CHANNELS 8
 
 typedef enum {
     ADC_AREF         = 0 << REFS1 | 0 << REFS0,
@@ -29,15 +41,24 @@ typedef enum {
 } ADC_preescaler_t;
 
 typedef enum {
-    CH0 = 1 << 0,
-    CH1 = 1 << 1,
-    CH2 = 1 << 2,
-    CH3 = 1 << 3,
-    CH4 = 1 << 4,
-    CH5 = 1 << 5,
-    CH6 = 1 << 6,
-    CH7 = 1 << 7,
+    CH0 = (0 << MUX3) | (0 << MUX2) | (0 << MUX1) | (0 << MUX0),
+    CH1 = (0 << MUX3) | (0 << MUX2) | (0 << MUX1) | (1 << MUX0),
+    CH2 = (0 << MUX3) | (0 << MUX2) | (1 << MUX1) | (0 << MUX0),
+    CH3 = (0 << MUX3) | (0 << MUX2) | (1 << MUX1) | (1 << MUX0),
+    CH4 = (0 << MUX3) | (1 << MUX2) | (0 << MUX1) | (0 << MUX0),
+    CH5 = (0 << MUX3) | (1 << MUX2) | (0 << MUX1) | (1 << MUX0),
+    CH6 = (0 << MUX3) | (1 << MUX2) | (1 << MUX1) | (0 << MUX0),
+    CH7 = (0 << MUX3) | (1 << MUX2) | (1 << MUX1) | (1 << MUX0),
 } ADC_channel_t;
+
+typedef enum {
+    LP_CH0 = (1 << 0),
+    LP_CH1 = (1 << 1),
+    LP_CH2 = (1 << 2),
+    LP_CH3 = (1 << 3),
+    LP_CH4 = (1 << 4),
+    LP_CH5 = (1 << 5),
+} ADC_low_power_channel_t;
 
 typedef enum {
     CH_VBG  = (1 << MUX3) | (1 << MUX2) | (1 << MUX1) | (0 << MUX0),    // Internal 1.1V bandgap reference
@@ -57,45 +78,51 @@ typedef enum {
 } ADC_trigger_t;
 
 typedef enum {
-    ADC_10B_RESOLUTION,
-    ADC_8B_RESOLUTION,
-} ADC_bitres_t;
+    ADC_10B_RESOLUTION = (0 << ADLAR),
+    ADC_8B_RESOLUTION  = (1 << ADLAR),
+} ADC_resolution_t;
 
 typedef struct {
-    ADC_bitres_t bits;
+    ADC_resolution_t bits;
     ADC_reference_t reference;
     ADC_preescaler_t preescaler;
-    ADC_channel_t low_power_channels;    // e.g: CH1|CH2|CH3|CH4|CH5|CH6
+    ADC_low_power_channel_t low_power_channels;    // e.g: CH1|CH2|CH3|CH4|CH5|CH6
     ADC_trigger_t trigger_source;
 } ADC_init_t;
 
 typedef enum {
+    ADC_STOPED,
+    ADC_IDLE,
     ADC_BUSY,
     ADC_EOC,
-    ADC_IDLE,
+    ADC_CALIBRATING,
 } ADC_state_t;
 
-float ADC_get_ref_voltage(ADC_handle_t *hadc);
-void ADC_read_voltages(ADC_handle_t *hadc, ADC_channel_t channels, float *res_array, uint8_t n_res);
-
-#ifdef USE_ADC_EEPROM_CALIBRATED_INT_REF
-ADC_handle_t *ADC_init(ADC_init_t *cfg, void (*feedback_callback)(void));
-#else
 ADC_handle_t *ADC_init(ADC_init_t *cfg);
+ADC_handle_t *ADC_IT_init(ADC_init_t *cfg);
+
+void ADC_set_calibration(ADC_handle_t *hadc, void *parameters);
+
+void ADC_set_reference(ADC_handle_t *hadc, ADC_reference_t reference);
+ADC_reference_t ADC_get_reference(ADC_handle_t *hadc);
+
+uint16_t ADC_read(ADC_handle_t *hadc, ADC_channel_t channel);
+uint16_t ADC_read_mV(ADC_handle_t *hadc, ADC_channel_t channel);
+
+uint16_t ADC_high_impedance_read(ADC_handle_t *hadc, ADC_channel_t channel, uint8_t load_kohms);
+uint16_t ADC_high_impedance_read_mV(ADC_handle_t *hadc, ADC_channel_t channel, uint8_t load_kohms);
+
+void ADC_IT_read(ADC_handle_t *hadc, ADC_channel_t channel);
+void ADC_IT_read_mV(ADC_handle_t *hadc, ADC_channel_t channel);
+
+void ADC_IT_high_impedance_read(ADC_handle_t *hadc, ADC_channel_t channel, uint8_t load_kohms);
+void ADC_IT_high_impedance_read_mV(ADC_handle_t *hadc, ADC_channel_t channel, uint8_t load_kohms);
+
+/* ---------------------------------- Utils --------------------------------- */
+uint16_t ADC_read_VCC_mV(ADC_handle_t *hadc);
+void ADC_IT_read_VCC_mV(ADC_handle_t *hadc);
+
+ADC_state_t ADC_get_state(ADC_handle_t *hadc);
+
+extern void ADC_EOC_callback(ADC_handle_t *hadc, uint16_t value);
 #endif
-uint16_t ADC_read(ADC_handle_t *hadc, ADC_channel_t ch);
-float ADC_read_voltage(ADC_handle_t *hadc, ADC_channel_t ch);
-float ADC_read_vcc_voltage(ADC_handle_t *hadc);
-
-#ifdef USE_ADC_EEPROM_CALIBRATED_INT_REF
-ADC_handle_t *ADC_init_IT(ADC_init_t *cfg, void (*feedback_callback)(void));
-#else
-ADC_handle_t *ADC_init_IT(ADC_init_t *cfg);
-#endif
-void ADC_read_IT(ADC_channel_t ch);
-void ADC_read_voltage_IT(ADC_channel_t ch);
-void ADC_read_vcc_voltage_IT(ADC_handle_t *hadc);
-
-extern void ADC_EOC_callback(ADC_handle_t *hadc);
-
-#endif    // ADC_H
