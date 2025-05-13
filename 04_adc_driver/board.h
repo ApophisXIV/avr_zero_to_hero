@@ -71,9 +71,12 @@ static float f_cpu_hz = F_CPU_HZ;
 // CPU Prescaler -----------------------------
 // #define USE_CPU_CLOCK_PRESCALER_AT_RUNTIME
 
+// GPIO --------------------------------------
+#define USE_GPIO
+
 // ADC ---------------------------------------
 #define USE_ADC
-#define USE_ADC_EEPROM_CALIBRATED_INT_REF
+#define USE_ADC_CALIBRATION
 
 // UART --------------------------------------
 #define USE_UART
